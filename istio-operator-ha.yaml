@@ -1,0 +1,70 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  creationTimestamp: null
+spec:
+  hub: gcr.io/nsx-sm/istio
+  tag: 1.20.2
+  addonComponents:
+  meshConfig:
+    enableTracing: false
+  components:
+    ingressGateways:
+    - enabled: true
+      k8s:
+        hpaSpec:
+          minReplicas: 2
+        tolerations:
+          - effect: NoSchedule
+            key: owner
+            operator: Equal
+            value: istio-system
+        resources: 
+          limits: 
+            cpu: 2000m
+            memory: 3Gi
+          requests: 
+            cpu: 1000m
+            memory: 512Mi
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchLabels:
+                    istio: ingressgateway
+                    app: istio-ingressgateway
+                topologyKey: kubernetes.io/hostname
+      name: istio-ingressgateway
+    pilot:
+      k8s:
+        hpaSpec:
+          minReplicas: 2
+        tolerations:
+          - effect: NoSchedule
+            key: owner
+            operator: Equal
+            value: istio-system
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchLabels:
+                    istio: pilot
+                    app: pilot
+                topologyKey: kubernetes.io/hostname
+  values:
+    gateways:
+      istio-ingressgateway:
+    global:
+      defaultNodeSelector:
+        owner: istio-system
+      defaultTolerations:
+      - effect: NoSchedule
+        key: owner
+        operator: Equal
+        value: istio-system
+      logging:
+        level: all:warn
+    pilot:
+      env:
+        PILOT_ENABLE_INBOUND_PASSTHROUGH: false

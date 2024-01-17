@@ -1,0 +1,33 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  creationTimestamp: null
+spec:
+  hub: gcr.io/nsx-sm/istio
+  tag: 1.20.2
+  meshConfig:
+    enableTracing: false
+  addonComponents:
+  components:
+    ingressGateways:
+    - enabled: true
+      k8s:
+        resources: 
+          limits: 
+            cpu: 2000m
+            memory: 3Gi
+          requests: 
+            cpu: 1000m
+            memory: 512Mi
+      name: istio-ingressgateway
+  values:
+    gateways:
+      istio-ingressgateway:
+    global:
+      logging:
+        level: all:warn
+    sidecarInjectorWebhook:
+      rewriteAppHTTPProbe: true
+    pilot:
+      env:
+        PILOT_ENABLE_INBOUND_PASSTHROUGH: false
