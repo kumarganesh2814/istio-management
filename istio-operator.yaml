@@ -3,7 +3,7 @@ kind: IstioOperator
 metadata:
   creationTimestamp: null
 spec:
-  hub: gcr.io/nsx-sm/istio
+  hub: docker.io/istio
   tag: 1.20.2
   meshConfig:
     enableTracing: false
